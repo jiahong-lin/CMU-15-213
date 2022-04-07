@@ -30,6 +30,7 @@ queue_t *queue_new(void) {
     }
     q->size = 0;
     q->head = NULL;
+    q->tail = NULL;
     return q;
 }
 
@@ -110,10 +111,16 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     }
     newt->value = malloc((strlen(s) + 1) * sizeof(char));
     strcpy(newt->value, s);
-    q->tail->next = newt;
-    q->tail = newt;
-    q->tail->next = NULL;
-    q->size++;
+    if (q->size != 0) {
+        q->tail->next = newt;
+        q->tail = newt;
+        q->tail->next = NULL;
+        q->size++;
+    } else {
+        newt->next = q->head;
+        q->head = newt;
+        q->tail = newt;
+    }
     return true;
 }
 
