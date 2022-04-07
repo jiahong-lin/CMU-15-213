@@ -40,6 +40,8 @@ queue_t *queue_new(void) {
  */
 void queue_free(queue_t *q) {
     /* How about freeing the list elements and the strings? */
+    if (q == NULL || q->head == NULL)
+        return;
     for (size_t i = q->size; i > 0; --i) {
         list_ele_t *elem = q->head;
         q->head = q->head->next;
@@ -146,15 +148,17 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     if (q == NULL || q->head == NULL) {
         return false;
     }
-
-    // Copy string value to the buffer.
-    for (size_t i = 0; i < bufsize - 1; ++i) {
-        buf[i] = q->head->value[i];
-    }
-    // Add a null terminator.
-    buf[bufsize - 1] = '\0';
     // Free the char*, then the whole list element.
     list_ele_t *elem = q->head;
+    if (buf != NULL) {
+        // Copy string value to the buffer.
+        size_t copy_len = strlen(elem->value) < (bufsize - 1)
+                              ? strlen(elem->value)
+                              : (bufsize - 1);
+        memcpy(buf, elem->value, copy_len);
+        // Add a null terminator.
+        buf[copy_len] = '\0';
+    }
     q->head = q->head->next;
     free(elem->value);
     free(elem);
