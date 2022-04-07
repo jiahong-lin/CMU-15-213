@@ -181,23 +181,39 @@ size_t queue_size(queue_t *q) {
  */
 void queue_reverse(queue_t *q) {
     /* You need to write the code for this function */
-    list_ele_t *temp, *location;
-    for (size_t i = 0; i < q->size / 2; ++i) { 
-        // WRONG! JUST MANIPULATING POINTERS, NOT
-        // THE REAL ELEMEMT!!
-        // TO BE FIXED...
-        temp = malloc(sizeof(list_ele_t));
-        if (temp == NULL) {
-            return false;
+    if (q == NULL || q->head == NULL)
+        return;
+    list_ele_t *left, *right;
+    char *temp;
+    left = q->head;
+    right = left;
+    for (size_t i = 0; i < q->size / 2; ++i) {
+        size_t offset = q->size - i * 2 - 1;
+        for (size_t j = 0; j < offset; ++j) {
+            right = right->next;
         }
+        // temp <- left
+        temp = malloc((strlen(left->value) + 1) * sizeof(char));
+        if (temp == NULL)
+            return;
+        strcpy(temp, left->value);
 
-        temp->value = malloc((strlen() + 1) * sizeof(char));
-    strcpy(newt->value, s);
+        // left <- right
+        free(left->value);
+        left->value = malloc((strlen(right->value) + 1) * sizeof(char));
+        if (left->value == NULL)
+            return;
+        strcpy(left->value, right->value);
 
+        // right <- temp, swap complete.
+        free(right->value);
+        right->value = malloc((strlen(temp) + 1) * sizeof(char));
+        if (right->value == NULL)
+            return;
+        strcpy(right->value, temp);
 
-        temp = q->head;
-        q->head = q->tail;
-        q->tail = temp;
+        left = left->next;
+        right = left;
+        free(temp);
     }
-    free(temp);
 }
