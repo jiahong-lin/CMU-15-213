@@ -40,6 +40,10 @@ queue_t *queue_new(void) {
  */
 void queue_free(queue_t *q) {
     /* How about freeing the list elements and the strings? */
+    // NULL queue: `q == NULL`
+    // Empty queue: `q->head == NULL`
+    if (q == NULL)
+        return;
     for (size_t i = q->size; i > 0; --i) {
         list_ele_t *elem = q->head;
         q->head = q->head->next;
@@ -104,23 +108,29 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     if (q == NULL) {
         return false;
     }
+
     list_ele_t *newt;
     newt = malloc(sizeof(list_ele_t));
     if (newt == NULL) {
         return false;
     }
+
     newt->value = malloc((strlen(s) + 1) * sizeof(char));
+    if (newt->value == NULL) {
+        return false;
+    }
     strcpy(newt->value, s);
+    newt->next = NULL;
     if (q->size != 0) {
         q->tail->next = newt;
         q->tail = newt;
-        q->tail->next = NULL;
-        q->size++;
+
     } else {
         newt->next = q->head;
         q->head = newt;
         q->tail = newt;
     }
+    q->size++;
     return true;
 }
 
@@ -146,16 +156,19 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     if (q == NULL || q->head == NULL) {
         return false;
     }
-
-    // Copy string value to the buffer.
-    for (size_t i = 0; i < bufsize - 1; ++i) {
-        buf[i] = q->head->value[i];
-    }
-    // Add a null terminator.
-    buf[bufsize - 1] = '\0';
     // Free the char*, then the whole list element.
     list_ele_t *elem = q->head;
+    if (buf != NULL) {
+        // Copy string value to the buffer.
+        size_t copy_len = strlen(elem->value) < (bufsize - 1)
+                              ? strlen(elem->value)
+                              : (bufsize - 1);
+        memcpy(buf, elem->value, copy_len);
+        // Add a null terminator.
+        buf[copy_len] = '\0';
+    }
     q->head = q->head->next;
+    q->size--;
     free(elem->value);
     free(elem);
     return true;
@@ -174,6 +187,8 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
 size_t queue_size(queue_t *q) {
     /* You need to write the code for this function */
     /* Remember: It should operate in O(1) time */
+    if (q == NULL)
+        return 0;
     return q->size;
 }
 
@@ -190,37 +205,42 @@ void queue_reverse(queue_t *q) {
     /* You need to write the code for this function */
     if (q == NULL || q->head == NULL)
         return;
-    list_ele_t *left, *right;
-    char *temp;
+
+    list_ele_t *left;
     left = q->head;
-    right = left;
     for (size_t i = 0; i < q->size / 2; ++i) {
+        char *temp;
+
+        list_ele_t *right = left;
+
         size_t offset = q->size - i * 2 - 1;
         for (size_t j = 0; j < offset; ++j) {
             right = right->next;
         }
+        size_t left_len = strlen(left->value) + 1;
+        size_t right_len = strlen(right->value) + 1;
+
         // temp <- left
-        temp = malloc((strlen(left->value) + 1) * sizeof(char));
+        temp = malloc(sizeof(char) * left_len);
         if (temp == NULL)
             return;
         strcpy(temp, left->value);
 
         // left <- right
         free(left->value);
-        left->value = malloc((strlen(right->value) + 1) * sizeof(char));
+        left->value = malloc(sizeof(char) * right_len);
         if (left->value == NULL)
             return;
         strcpy(left->value, right->value);
 
         // right <- temp, swap complete.
         free(right->value);
-        right->value = malloc((strlen(temp) + 1) * sizeof(char));
+        right->value = malloc(sizeof(char) * left_len);
         if (right->value == NULL)
             return;
         strcpy(right->value, temp);
+        free(temp);
 
         left = left->next;
-        right = left;
-        free(temp);
     }
 }
