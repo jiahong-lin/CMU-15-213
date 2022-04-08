@@ -206,41 +206,15 @@ void queue_reverse(queue_t *q) {
     if (q == NULL || q->head == NULL)
         return;
 
-    list_ele_t *left;
-    left = q->head;
-    for (size_t i = 0; i < q->size / 2; ++i) {
-        char *temp;
-
-        list_ele_t *right = left;
-
-        size_t offset = q->size - i * 2 - 1;
-        for (size_t j = 0; j < offset; ++j) {
-            right = right->next;
-        }
-        size_t left_len = strlen(left->value) + 1;
-        size_t right_len = strlen(right->value) + 1;
-
-        // temp <- left
-        temp = malloc(sizeof(char) * left_len);
-        if (temp == NULL)
-            return;
-        strcpy(temp, left->value);
-
-        // left <- right
-        free(left->value);
-        left->value = malloc(sizeof(char) * right_len);
-        if (left->value == NULL)
-            return;
-        strcpy(left->value, right->value);
-
-        // right <- temp, swap complete.
-        free(right->value);
-        right->value = malloc(sizeof(char) * left_len);
-        if (right->value == NULL)
-            return;
-        strcpy(right->value, temp);
-        free(temp);
-
-        left = left->next;
+    list_ele_t *prev = NULL;
+    list_ele_t *current = q->head;
+    list_ele_t *next;
+    q->tail = current;
+    while (current != NULL) {
+        next = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
     }
+    q->head = prev;
 }
