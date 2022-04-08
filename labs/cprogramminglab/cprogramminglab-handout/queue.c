@@ -44,7 +44,7 @@ void queue_free(queue_t *q) {
     // Empty queue: `q->head == NULL`
     if (q == NULL)
         return;
-    for (size_t i = q->size; i > 0; --i) {
+    for (size_t i = 0; i < q->size; ++i) {
         list_ele_t *elem = q->head;
         q->head = q->head->next;
         free(elem->value);
