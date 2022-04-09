@@ -136,8 +136,27 @@ long copyLSB(long x) {
  *   Rating: 2
  */
 long dividePower2(long x, long n) {
-    long result = (~x + 1) >> n;
-    return ~result + 1;
+    // if x >= 0 || x == 0x800...0 , just return x >> n.
+    // else if x < 0, should return -(-x >> n).
+    // we could use '~x+1' to implement -x, but how to distinguish
+    // between these two cases without using an if-else sentence?
+
+    // Special case: 0x8000...0
+    // Normally, ~x+1 != x. However 0x8000...0 is an exception,
+    //  let's take advantage of that.
+    // '000...0' for x==0x8000...0, otherwise it's '111...1'.
+    long x_is_smallest_pos = (x ^ (~x + 1)) >> 63;
+
+    long mask = x >> 63; // '1111..1' if x is negative
+    // for 0x800...0 or positive, mask should be '000...0'
+    mask = mask & x_is_smallest_pos;
+    
+    long plus_one_or_none = !!mask; // '1' if x is negative
+    // if x >= 0, then x^mask == x^0000...0 == x
+    // otherwise x^mask == x^1111...1 == ~x
+    long result = ((x ^ mask) + plus_one_or_none) >> n;
+    result = (result ^ mask) + plus_one_or_none;
+    return result;
 }
 /*
  * distinctNegation - returns 1 if x != -x.
@@ -169,7 +188,11 @@ long anyEvenBit(long x) {
  *   Rating: 3
  */
 long isLessOrEqual(long x, long y) {
-    return 2;
+    // long x_sign = !!(x >> 63); // 0 if x>=0,  else 1
+    // long y_sign = !!(y >> 63);
+    // long y_minus_x = y + (~x + 1);
+    // return !(y_minus_x >> 63);
+    return 2L;
 }
 /*
  * replaceByte(x,n,c) - Replace byte n in x with c
