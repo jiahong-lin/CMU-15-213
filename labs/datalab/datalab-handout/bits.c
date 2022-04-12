@@ -150,7 +150,7 @@ long dividePower2(long x, long n) {
     long mask = x >> 63; // '1111..1' if x is negative
     // for 0x800...0 or positive, mask should be '000...0'
     mask = mask & x_is_smallest_pos;
-    
+
     long plus_one_or_none = !!mask; // '1' if x is negative
     // if x >= 0, then x^mask == x^0000...0 == x
     // otherwise x^mask == x^1111...1 == ~x
@@ -188,11 +188,20 @@ long anyEvenBit(long x) {
  *   Rating: 3
  */
 long isLessOrEqual(long x, long y) {
-    // long x_sign = !!(x >> 63); // 0 if x>=0,  else 1
-    // long y_sign = !!(y >> 63);
-    // long y_minus_x = y + (~x + 1);
-    // return !(y_minus_x >> 63);
-    return 2L;
+    // Case1: If x and y don't have the same sign, check the sign
+    //        of x to see if x>=0.
+    // Case2: Else, check the sign of x_minus_y
+
+    long x_sign = !!(x >> 63); // '0' if x>=0,  else '1'
+    long y_sign = !!(y >> 63);
+    long diff_sign = x_sign ^ y_sign; // '1' if x and y have different signs
+    long case_1 =
+        diff_sign & (!y_sign); // '1' if and only if y>=0 and x is negative.
+
+    long y_minus_x =
+        y + (~x + 1); // This won't overflow since x and y have the same signs
+    long case_2 = (!diff_sign) & !(y_minus_x >> 63); // '1' if y>=x
+    return case_1 || case_2; // Put these two cases together
 }
 /*
  * replaceByte(x,n,c) - Replace byte n in x with c
