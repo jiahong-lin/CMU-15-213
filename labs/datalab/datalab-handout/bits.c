@@ -177,7 +177,13 @@ long distinctNegation(long x) {
  *   Rating: 2
  */
 long anyEvenBit(long x) {
-    return 2L;
+    // Not allowed to use big constants?
+    long mask = 0x55; // even numbered bits mask: [0101 0101]
+    mask = (mask << 8) | mask;
+    mask = (mask << 16) | mask;
+    mask = (mask << 32) | mask;
+    long result = mask & x;
+    return !!(result);
 }
 // 3
 /*
@@ -200,8 +206,9 @@ long isLessOrEqual(long x, long y) {
 
     long y_minus_x =
         y + (~x + 1); // This won't overflow since x and y have the same signs
-    long case_2 = (!diff_sign) & !(y_minus_x >> 63); // '1' if y>=x
-    return case_1 || case_2; // Put these two cases together
+    long case_2 =
+        (!diff_sign) & !(y_minus_x >> 63); // '1' if it's not case_1 and y>=x
+    return case_1 | case_2;                // Put these two cases together
 }
 /*
  * replaceByte(x,n,c) - Replace byte n in x with c
@@ -223,7 +230,9 @@ long replaceByte(long x, long n, long c) {
  *   Rating: 3
  */
 long conditional(long x, long y, long z) {
-    return 2L;
+    long bool_x = !!x;
+    long mask = bool_x << 63 >> 63;
+    return (mask & y) | (~mask & z);
 }
 /*
  * bitMask - Generate a mask consisting of all 1's
@@ -272,5 +281,7 @@ long trueFiveEighths(long x) {
  *   Rating: 4
  */
 long logicalNeg(long x) {
-    return 2L;
+    long mask = x | (~x + 1);
+    mask = mask >> 63;
+    return mask + 1;
 }
