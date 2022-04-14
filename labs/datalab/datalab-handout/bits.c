@@ -288,7 +288,6 @@ long isPalindrome(long x) {
     reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
               ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
     return !(x ^ reverse);
-    // return reverse;
 }
 /*
  * trueFiveEighths - multiplies by 5/8 rounding toward 0,
