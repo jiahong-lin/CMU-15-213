@@ -272,8 +272,24 @@ long bitMask(long highbit, long lowbit) {
  *   Rating: 4
  */
 long isPalindrome(long x) {
-
-    return 2L;
+    // reverse and match
+    // But how to do it without breaking the long constant limit?
+    long reverse = x;
+    reverse = ((reverse & 0xAAAAAAAAAAAAAAAA) >> 1) |
+              ((reverse & 0x5555555555555555) << 1);
+    reverse = ((reverse & 0xCCCCCCCCCCCCCCCC) >> 2) |
+              ((reverse & 0x3333333333333333) << 2);
+    reverse = ((reverse & 0xF0F0F0F0F0F0F0F0) >> 4) |
+              ((reverse & 0x0F0F0F0F0F0F0F0F) << 4);
+    reverse = ((reverse & 0xFF00FF00FF00FF00) >> 8) |
+              ((reverse & 0x00FF00FF00FF00FF) << 8);
+    reverse = ((reverse & 0xFFFF0000FFFF0000) >> 16) |
+              ((reverse & 0x0000FFFF0000FFFF) << 16);
+    
+    reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
+              ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
+    return !(x ^ reverse);
+    // return reverse;
 }
 /*
  * trueFiveEighths - multiplies by 5/8 rounding toward 0,
