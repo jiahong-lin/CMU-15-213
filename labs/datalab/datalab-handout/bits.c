@@ -285,7 +285,6 @@ long isPalindrome(long x) {
               ((reverse & 0x00FF00FF00FF00FF) << 8);
     reverse = ((reverse & 0xFFFF0000FFFF0000) >> 16) |
               ((reverse & 0x0000FFFF0000FFFF) << 16);
-    
     reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
               ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
     return !(x ^ reverse);
