@@ -220,7 +220,13 @@ long isLessOrEqual(long x, long y) {
  *   Rating: 3
  */
 long replaceByte(long x, long n, long c) {
-    return 2;
+    long tmin = 0x01L << 63;
+    long mask_1 = tmin >> (63 - (8 * (n + 1)));
+    long mask_2 = tmin >> (63 - (8 * n));
+    mask_2 = ~mask_2;
+    long mask = mask_1 | mask_2;
+    long result = (x & mask) | (c << 8 * n);
+    return result;
 }
 /*
  * conditional - same as x ? y : z
@@ -245,7 +251,25 @@ long conditional(long x, long y, long z) {
  *   Rating: 3
  */
 long bitMask(long highbit, long lowbit) {
-    return 2L;
+    // 0x38L: 0011 1000
+    //          ^  ^
+    //          5  3
+    //        0011 1111
+    //      ^ 0000 1111
+    //--------------------
+    //        0011 0000
+
+    long mask = 0x01L << 63;
+
+    long high = mask >> (63 - highbit);
+    long low = mask >> (63 - lowbit);
+    high = ~high;
+    low = ~low;
+    long result = high ^ low;
+    long extra_one = 0x01 << lowbit;
+    result = result | extra_one;
+    printf("result: %ld\n", result);
+    return result;
 }
 // 4
 /*
