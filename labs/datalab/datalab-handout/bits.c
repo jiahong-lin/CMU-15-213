@@ -220,12 +220,9 @@ long isLessOrEqual(long x, long y) {
  *   Rating: 3
  */
 long replaceByte(long x, long n, long c) {
-    long tmin = 0x01L << 63;
-    long mask_1 = tmin >> (63 - (8 * (n + 1)));
-    long mask_2 = tmin >> (63 - (8 * n));
-    mask_2 = ~mask_2;
-    long mask = mask_1 | mask_2;
-    long result = (x & mask) | (c << 8 * n);
+    long bits = n << 3;
+    long mask = ~(0xFFL << bits);
+    long result = (x & mask) | (c << bits);
     return result;
 }
 /*
@@ -251,25 +248,20 @@ long conditional(long x, long y, long z) {
  *   Rating: 3
  */
 long bitMask(long highbit, long lowbit) {
-    // 0x38L: 0011 1000
-    //          ^  ^
-    //          5  3
-    //        0011 1111
-    //      ^ 0000 1111
-    //--------------------
-    //        0011 0000
+    // For x=111..1, x <<= 64 would return -1L (since shifted 64-64==0)
+    // For x=111..1, x <<= 63 (Tmin), then x <<= 1, would return 0L (000..00)
 
-    long mask = 0x01L << 63;
-
-    long high = mask >> (63 - highbit);
-    long low = mask >> (63 - lowbit);
-    high = ~high;
-    low = ~low;
-    long result = high ^ low;
-    long extra_one = 0x01 << lowbit;
-    result = result | extra_one;
-    printf("result: %ld\n", result);
-    return result;
+    // ./btest -f bitMask -1 63L -2 0L
+    // printf("Case1: mask << 64: %ld\n", mask << (highbit + 1));
+    // printf("Case2: mask << 63, then << 1: ");
+    // mask <<= highbit;
+    // mask <<= 1;
+    // printf("%ld\n", mask);
+    long mask = ~0x00L;
+    long high = mask << highbit;
+    high = ~(high << 1);
+    long low = mask << lowbit;
+    return low & high;
 }
 // 4
 /*
@@ -280,6 +272,7 @@ long bitMask(long highbit, long lowbit) {
  *   Rating: 4
  */
 long isPalindrome(long x) {
+
     return 2L;
 }
 /*
