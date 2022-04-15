@@ -275,18 +275,74 @@ long isPalindrome(long x) {
     // reverse and match
     // But how to do it without breaking the long constant limit?
     long reverse = x;
-    reverse = ((reverse & 0xAAAAAAAAAAAAAAAA) >> 1) |
-              ((reverse & 0x5555555555555555) << 1);
-    reverse = ((reverse & 0xCCCCCCCCCCCCCCCC) >> 2) |
-              ((reverse & 0x3333333333333333) << 2);
-    reverse = ((reverse & 0xF0F0F0F0F0F0F0F0) >> 4) |
-              ((reverse & 0x0F0F0F0F0F0F0F0F) << 4);
-    reverse = ((reverse & 0xFF00FF00FF00FF00) >> 8) |
-              ((reverse & 0x00FF00FF00FF00FF) << 8);
-    reverse = ((reverse & 0xFFFF0000FFFF0000) >> 16) |
-              ((reverse & 0x0000FFFF0000FFFF) << 16);
-    reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
-              ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
+
+    long constant_1_left = 0xAAL;
+    constant_1_left |= constant_1_left << 8;
+    constant_1_left |= constant_1_left << 16;
+    constant_1_left |= constant_1_left << 32;
+    long constant_1_right = ~constant_1_left;
+
+    long constant_2_left = 0xCCL;
+    constant_2_left |= constant_2_left << 8;
+    constant_2_left |= constant_2_left << 16;
+    constant_2_left |= constant_2_left << 32;
+    long constant_2_right = ~constant_2_left;
+
+    long constant_3_left = 0xF0L;
+    constant_3_left |= constant_3_left << 8;
+    constant_3_left |= constant_3_left << 16;
+    constant_3_left |= constant_3_left << 32;
+    long constant_3_right = ~constant_3_left;
+
+    long constant_4_left = 0xFFL << 8;
+    constant_4_left |= constant_4_left << 16;
+    constant_4_left |= constant_4_left << 32;
+    long constant_4_right = ~constant_4_left;
+
+    long constant_5_left = 0xFFL << 16;
+    constant_5_left |= constant_5_left << 8;
+    constant_5_left |= constant_5_left << 32;
+    long constant_5_right = ~constant_5_left;
+
+    long constant_6 = ~0x00L;
+    long mask = ~(0x01L << 63); // 01111111..1
+    reverse = (((reverse & constant_1_left) >> 1) & mask) |
+              ((reverse & constant_1_right) << 1);
+
+    reverse = (((reverse & constant_2_left) >> 2) & (mask >> 1)) |
+              ((reverse & constant_2_right) << 2);
+
+    reverse = (((reverse & constant_3_left) >> 4) & (mask >> 3)) |
+              ((reverse & constant_3_right) << 4);
+
+    reverse = (((reverse & constant_4_left) >> 8) & (mask >> 7)) |
+              ((reverse & constant_4_right) << 8);
+
+    reverse = (((reverse & constant_5_left) >> 16) & (mask >> 15)) |
+              ((reverse & constant_5_right) << 16);
+
+    reverse = (((reverse & constant_6) >> 32) & (mask >> 31)) |
+              ((reverse & constant_6) << 32);
+
+    //--------------------------------------------------------------------
+    // reverse = ((reverse & 0xAAAAAAAAAAAAAAAA) >> 1) |
+    //           ((reverse & 0x5555555555555555) << 1);
+
+    // reverse = ((reverse & 0xCCCCCCCCCCCCCCCC) >> 2) |
+    //           ((reverse & 0x3333333333333333) << 2);
+
+    // reverse = ((reverse & 0xF0F0F0F0F0F0F0F0) >> 4) |
+    //           ((reverse & 0x0F0F0F0F0F0F0F0F) << 4);
+
+    // reverse = ((reverse & 0xFF00FF00FF00FF00) >> 8) |
+    //           ((reverse & 0x00FF00FF00FF00FF) << 8);
+
+    // reverse = ((reverse & 0xFFFF0000FFFF0000) >> 16) |
+    //           ((reverse & 0x0000FFFF0000FFFF) << 16);
+
+    // reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
+    //           ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
+    //--------------------------------------------------------------------
     return !(x ^ reverse);
 }
 /*
