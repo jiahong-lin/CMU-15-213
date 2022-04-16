@@ -272,40 +272,37 @@ long bitMask(long highbit, long lowbit) {
  *   Rating: 4
  */
 long isPalindrome(long x) {
-    // reverse and match
-    // But how to do it without breaking the long constant limit?
-    long reverse = x;
+    // idea: Take the lower 32 bits, do a bit-level reversal,
+    // then right shift the higer 32 bits, see if they match
+    // the reversed lower 32 bits.
 
-    long constant_1_left = 0xAAL;
+    // The most tricky thing is to avoid breaking the long constant limit
+    // or the ops count limit.
+    int reverse = x;  // cast to INT, since we only need the lower 32 bits.
+
+    // Create some masks.
+    int constant_1_left = 0xAA;
     constant_1_left |= constant_1_left << 8;
     constant_1_left |= constant_1_left << 16;
-    constant_1_left |= constant_1_left << 32;
-    long constant_1_right = ~constant_1_left;
+    int constant_1_right = ~constant_1_left;
 
-    long constant_2_left = 0xCCL;
+    int constant_2_left = 0xCC;
     constant_2_left |= constant_2_left << 8;
     constant_2_left |= constant_2_left << 16;
-    constant_2_left |= constant_2_left << 32;
-    long constant_2_right = ~constant_2_left;
+    int constant_2_right = ~constant_2_left;
 
-    long constant_3_left = 0xF0L;
+    int constant_3_left = 0xF0;
     constant_3_left |= constant_3_left << 8;
     constant_3_left |= constant_3_left << 16;
-    constant_3_left |= constant_3_left << 32;
-    long constant_3_right = ~constant_3_left;
+    int constant_3_right = ~constant_3_left;
 
-    long constant_4_left = 0xFFL << 8;
+    int constant_4_left = 0xFF << 8;
     constant_4_left |= constant_4_left << 16;
-    constant_4_left |= constant_4_left << 32;
-    long constant_4_right = ~constant_4_left;
+    int constant_4_right = ~constant_4_left;
 
-    long constant_5_left = 0xFFL << 16;
-    constant_5_left |= constant_5_left << 8;
-    constant_5_left |= constant_5_left << 32;
-    long constant_5_right = ~constant_5_left;
-
-    long constant_6 = ~0x00L;
-    long mask = ~(0x01L << 63); // 01111111..1
+    int constant_6 = ~0x00;
+    int mask = ~(0x01 << 31); // 01111111..1
+    // Reverse those bits.
     reverse = (((reverse & constant_1_left) >> 1) & mask) |
               ((reverse & constant_1_right) << 1);
 
@@ -318,14 +315,13 @@ long isPalindrome(long x) {
     reverse = (((reverse & constant_4_left) >> 8) & (mask >> 7)) |
               ((reverse & constant_4_right) << 8);
 
-    reverse = (((reverse & constant_5_left) >> 16) & (mask >> 15)) |
-              ((reverse & constant_5_right) << 16);
+    reverse = (((reverse & constant_6) >> 16) & (mask >> 15)) |
+              ((reverse & constant_6) << 16);
 
-    reverse = (((reverse & constant_6) >> 32) & (mask >> 31)) |
-              ((reverse & constant_6) << 32);
-
+    // NOTICE: ALL THE CODE ABOVE IS TO DO THE FOLLOWING
+    // WITHOUT BREAKING THE 'LONG CONSTANT' LIMIT.
     //--------------------------------------------------------------------
-    // reverse = ((reverse & 0xAAAAAAAAAAAAAAAA) >> 1) |
+    // reverse = ((reverse & 0xAAAAAAAAAAAAAAAA) >> 1) |  // reversal for LONG
     //           ((reverse & 0x5555555555555555) << 1);
 
     // reverse = ((reverse & 0xCCCCCCCCCCCCCCCC) >> 2) |
@@ -339,11 +335,10 @@ long isPalindrome(long x) {
 
     // reverse = ((reverse & 0xFFFF0000FFFF0000) >> 16) |
     //           ((reverse & 0x0000FFFF0000FFFF) << 16);
-
-    // reverse = ((reverse & 0xFFFFFFFFFFFFFFFF) >> 32) |
-    //           ((reverse & 0xFFFFFFFFFFFFFFFF) << 32);
     //--------------------------------------------------------------------
-    return !(x ^ reverse);
+
+    // see if they match
+    return !((x >> 32) ^ reverse);
 }
 /*
  * trueFiveEighths - multiplies by 5/8 rounding toward 0,
