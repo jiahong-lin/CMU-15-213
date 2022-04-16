@@ -272,13 +272,15 @@ long bitMask(long highbit, long lowbit) {
  *   Rating: 4
  */
 long isPalindrome(long x) {
-    // idea: Take the lower 32 bits, do a bit-level reversal,
-    // then right shift the higer 32 bits, see if they match
-    // the reversed lower 32 bits.
+    // Check:
+    // https://stackoverflow.com/questions/4245936/mirror-bits-of-a-32-bit-word
+
+    // idea: Take the lower 32 bits, do a bit-wise reversal,
+    // then right shift the higer 32 bits, see if they are identical.
 
     // The most tricky thing is to avoid breaking the long constant limit
     // or the ops count limit.
-    int reverse = x;  // cast to INT, since we only need the lower 32 bits.
+    int reverse = x; // cast to INT, since we only need the lower 32 bits.
 
     // Create some masks.
     int constant_1_left = 0xAA;
@@ -303,8 +305,9 @@ long isPalindrome(long x) {
     int constant_6 = ~0x00;
     int mask = ~(0x01 << 31); // 01111111..1
     // Reverse those bits.
-    reverse = (((reverse & constant_1_left) >> 1) & mask) |
-              ((reverse & constant_1_right) << 1);
+    reverse =
+        (((reverse & constant_1_left) >> 1) & mask) | // logical right shift
+        ((reverse & constant_1_right) << 1);
 
     reverse = (((reverse & constant_2_left) >> 2) & (mask >> 1)) |
               ((reverse & constant_2_right) << 2);
@@ -352,7 +355,16 @@ long isPalindrome(long x) {
  *  Rating: 4
  */
 long trueFiveEighths(long x) {
-    return 2L;
+
+    long sign = x >> 63;
+    long x_div8 = x >> 3;
+    long x_div8_mul5 = x_div8 + (x_div8 << 2);
+    long remain = x & 0x07L; // Get least significant 3 bits.
+    long remain_mul5 = remain + (remain << 2);
+    // long result = x_div8_mul5 + (remain_mul5 >> 3);
+    long result = (remain_mul5 + (sign & 0x07L)) >> 3;
+
+    return result + x_div8_mul5;
 }
 /*
  * logicalNeg - implement the ! operator, using all of
