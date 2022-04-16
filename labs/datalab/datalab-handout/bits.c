@@ -203,7 +203,6 @@ long isLessOrEqual(long x, long y) {
     long diff_sign = x_sign ^ y_sign; // '1' if x and y have different signs
     long case_1 =
         diff_sign & (!y_sign); // '1' if and only if y>=0 and x is negative.
-
     long y_minus_x =
         y + (~x + 1); // This won't overflow since x and y have the same signs
     long case_2 =
@@ -251,12 +250,14 @@ long bitMask(long highbit, long lowbit) {
     // For x=111..1, x <<= 64 would return -1L (since shifted 64-64==0)
     // For x=111..1, x <<= 63 (Tmin), then x <<= 1, would return 0L (000..00)
 
-    // ./btest -f bitMask -1 63L -2 0L
+    // Test scripts:
     // printf("Case1: mask << 64: %ld\n", mask << (highbit + 1));
     // printf("Case2: mask << 63, then << 1: ");
     // mask <<= highbit;
     // mask <<= 1;
     // printf("%ld\n", mask);
+    // ./btest -f bitMask -1 63L -2 0L
+
     long mask = ~0x00L;
     long high = mask << highbit;
     high = ~(high << 1);
@@ -355,15 +356,18 @@ long isPalindrome(long x) {
  *  Rating: 4
  */
 long trueFiveEighths(long x) {
-
     long sign = x >> 63;
     long x_div8 = x >> 3;
     long x_div8_mul5 = x_div8 + (x_div8 << 2);
     long remain = x & 0x07L; // Get least significant 3 bits.
     long remain_mul5 = remain + (remain << 2);
-    // long result = x_div8_mul5 + (remain_mul5 >> 3);
+    // For positive, just add remain_mul5 / 8.
+    // For negative, should add (remain_mul5 / 8) + 1, since 'x_div8' rounds
+    // towards the smaller way. But why use (remain_mul5 + 7) / 8 instead of
+    // (remain_mul5 + 8) / 8 ? Answer: Consider the case where x==0x8000..0, by
+    // using the former one, the remain part would be zero(which is correct),
+    // otherwise would be one in which case the answer is wrong.
     long result = (remain_mul5 + (sign & 0x07L)) >> 3;
-
     return result + x_div8_mul5;
 }
 /*
